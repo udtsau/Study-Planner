@@ -5,232 +5,148 @@
   <title>Study Planner</title>
 
  <style>
-    :root {
-      --apple-blue: #007AFF;
-      --apple-gray: #8E8E93;
-      --apple-bg: #F5F5F7;
-      --glass-bg: rgba(255, 255, 255, 0.7);
-    }
+  /* Updated Task Styling for Bold Symbols */
+  .task {
+    background: white;
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    animation: appleFade 0.4s ease;
+  }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
-      background-color: var(--apple-bg);
-      background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-                        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-                        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
-      background-attachment: fixed;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      color: #1D1D1F;
-    }
+  .task-text {
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
 
-    .container {
-      width: 400px;
-      background: var(--glass-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      padding: 40px;
-      border-radius: 30px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      animation: appleFade 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-    }
+  .completed {
+    text-decoration: line-through;
+    opacity: 0.4;
+  }
 
-    @keyframes appleFade {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
+  .action-buttons {
+    display: flex;
+    gap: 15px;
+  }
 
-    h2 {
-      font-size: 28px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      text-align: center;
-      margin-bottom: 30px;
-    }
+  .action-btn {
+    background: none;
+    border: none;
+    font-weight: 900;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 5px;
+    transition: transform 0.2s;
+  }
 
-    #mode {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--apple-gray);
-      text-align: center;
-      margin-bottom: 5px;
-    }
-
-    #timer {
-      font-size: 64px;
-      font-weight: 200;
-      text-align: center;
-      margin: 10px 0 30px 0;
-      font-variant-numeric: tabular-nums;
-    }
-
-    input {
-      background: rgba(0, 0, 0, 0.05);
-      border: none;
-      padding: 15px;
-      margin-bottom: 12px;
-      border-radius: 12px;
-      font-size: 16px;
-      transition: all 0.3s ease;
-    }
-
-    input:focus {
-      background: rgba(0, 0, 0, 0.08);
-      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
-    }
-
-    .button-group {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    button {
-      padding: 12px;
-      border-radius: 12px;
-      border: none;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .primary-btn {
-      background: var(--apple-blue);
-      color: white;
-      width: 100%;
-      margin-bottom: 30px;
-    }
-
-    .timer-btn {
-      background: rgba(0,0,0,0.05);
-      color: var(--apple-blue);
-    }
-
-    button:hover {
-      opacity: 0.8;
-    }
-
-    button:active {
-      transform: scale(0.96);
-    }
-
-    .task {
-      background: white;
-      padding: 15px;
-      border-radius: 12px;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
-  </style>
-</head>
-<body>
-
-<div class="container">
-  <h2>Study Planner</h2>
-
-  <input type="text" id="subject" placeholder="Subject">
-  <input type="text" id="topic" placeholder="Topic">
-  <input type="number" id="questions" placeholder="MCQs">
-
-  <button class="primary-btn" onclick="addTask()">Add Task</button>
-
-  <p id="mode">MODE: STUDY</p>
-  <p id="timer">60:00</p>
-  
-  <div class="button-group">
-    <button class="timer-btn" onclick="startTimer()">Start</button>
-    <button class="timer-btn" onclick="pauseTimer()">Pause</button>
-    <button class="timer-btn" onclick="resetTimer()">Reset</button>
-  </div>
-
-  <div id="taskList"></div>
-</div>
+  .tick-btn { color: #34C759; }
+  .cross-btn { color: #FF3B30; }
+  .action-btn:hover { transform: scale(1.2); }
+</style>
 
 <script>
-let time = 3600;
-let isStudy = true;
-let interval = null;
-let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+  let time = 3600; 
+  let isStudy = true;
+  let interval = null;
+  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 
-// PAUSE FUNCTION ADDED HERE
-function pauseTimer() {
-  clearInterval(interval);
-  interval = null;
-}
+  function updateDisplay() {
+    let min = Math.floor(time / 60);
+    let sec = time % 60;
+    document.getElementById("timer").innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+  }
 
-function startTimer() {
-  if (interval) return;
-  interval = setInterval(() => {
-    time--;
+  function startTimer() {
+    if (interval) return; // Already running
+    interval = setInterval(() => {
+      if (time > 0) {
+        time--;
+        updateDisplay();
+      } else {
+        clearInterval(interval);
+        interval = null;
+        isStudy = !isStudy;
+        time = isStudy ? 3600 : 600;
+        document.getElementById("mode").innerText = isStudy ? "MODE: STUDY" : "MODE: BREAK";
+        startTimer();
+      }
+    }, 1000);
+  }
+
+  function pauseTimer() {
+    clearInterval(interval);
+    interval = null;
+  }
+
+  function resetTimer() {
+    pauseTimer();
+    isStudy = true;
+    time = 3600;
+    document.getElementById("mode").innerText = "MODE: STUDY";
     updateDisplay();
-    if (time <= 0) {
-      clearInterval(interval);
-      interval = null;
-      isStudy = !isStudy;
-      time = isStudy ? 3600 : 600;
-      document.getElementById("mode").innerText = isStudy ? "MODE: STUDY" : "MODE: BREAK";
-      startTimer();
-    }
-  }, 1000);
-}
+  }
 
-function updateDisplay() {
-  let min = Math.floor(time / 60);
-  let sec = time % 60;
-  document.getElementById("timer").innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
-}
-
-function resetTimer() {
-  pauseTimer();
-  isStudy = true;
-  time = 3600;
-  document.getElementById("mode").innerText = "MODE: STUDY";
-  document.getElementById("timer").innerText = "60:00";
-}
-
-// Keep your existing addTask, saveTasks, renderTasks, etc. below this
-function addTask() {
+  function addTask() {
     const subject = document.getElementById("subject").value;
     const topic = document.getElementById("topic").value;
     const questions = document.getElementById("questions").value;
-    if (!subject || !topic || !questions) { alert("Fill all fields!"); return; }
+
+    if (!subject || !topic || !questions) {
+      alert("Please fill all fields");
+      return;
+    }
+
     tasks.push({ subject, topic, questions, completed: false });
-    saveTasks(); renderTasks();
+    saveAndRender();
+    
     document.getElementById("subject").value = "";
     document.getElementById("topic").value = "";
     document.getElementById("questions").value = "";
   }
-  function saveTasks() { localStorage.setItem("tasks", JSON.stringify(tasks)); }
-  function toggleComplete(index) { tasks[index].completed = !tasks[index].completed; saveTasks(); renderTasks(); }
-  function deleteTask(index) { tasks.splice(index, 1); saveTasks(); renderTasks(); }
+
+  function toggleComplete(index) {
+    tasks[index].completed = !tasks[index].completed;
+    saveAndRender();
+  }
+
+  function deleteTask(index) {
+    tasks.splice(index, 1);
+    saveAndRender();
+  }
+
+  function saveAndRender() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    renderTasks();
+  }
+
   function renderTasks() {
     const taskList = document.getElementById("taskList");
     taskList.innerHTML = "";
+
     tasks.forEach((task, index) => {
       const div = document.createElement("div");
       div.className = "task";
-      div.innerHTML = `<span>${task.subject} - ${task.topic}</span>
-                       <div>
-                         <button style="background:none; color:green" onclick="toggleComplete(${index})">✔</button>
-                         <button style="background:none; color:red" onclick="deleteTask(${index})">✖</button>
-                       </div>`;
+      
+      div.innerHTML = `
+        <span class="task-text ${task.completed ? 'completed' : ''}">
+          ${task.subject} - ${task.topic}
+        </span>
+        <div class="action-buttons">
+          <button class="action-btn tick-btn" onclick="toggleComplete(${index})">✓</button>
+          <button class="action-btn cross-btn" onclick="deleteTask(${index})">✕</button>
+        </div>
+      `;
       taskList.appendChild(div);
     });
   }
-  renderTasks();
-</script> 
 
+  // Initial load
+  renderTasks();
+</script>
 </body>
 </html>
