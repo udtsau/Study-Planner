@@ -180,19 +180,22 @@
     localStorage.setItem("tasks", JSON.stringify(tasks));
     const list = document.getElementById("taskList");
     list.innerHTML = "";
+    
     tasks.forEach((task, i) => {
+      // We added (${task.q} MCQs) to the line below
       list.innerHTML += `
         <div class="task">
-          <span class="task-text ${task.done ? 'completed' : ''}">${task.s} - ${task.t}</span>
-          <div>
+          <span class="task-text ${task.done ? 'completed' : ''}">
+            ${task.s} - ${task.t} (${task.q} MCQs)
+          </span>
+          <div class="action-buttons">
             <button class="action-btn tick-btn" onclick="toggleTask(${i})">✓</button>
             <button class="action-btn cross-btn" onclick="deleteTask(${i})">✕</button>
           </div>
         </div>`;
     });
   }
-
-  saveAndShow(); // Load tasks on start
+  saveAndShow();
 </script>
 
 </body>
