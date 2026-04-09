@@ -3,96 +3,135 @@
 <head>
   <meta charset="UTF-8">
   <title>Study Planner</title>
-  <style>
 
-  body 
-{
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: linear-gradient(135deg, #dbeafe, #f0fdf4);
-  
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
-}
-
-.container {
-  width: 380px;
-  background: white;
-  padding: 25px;
-  border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  animation: fadeIn 0.4s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-    h2 {
-  margin-bottom: 15px;
-}
-
-#progress {
-  margin-top: 10px;
-  font-size: 14px;
-  color: #555;
-}
-
-#mode {
-  margin-top: 15px;
-  font-weight: 600;
-}
-
-#timer {
-  font-size: 26px;
-  margin: 8px 0;
-}
-input {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
-  outline: none;
-  font-size: 14px;
-}
-
-input:focus {
-  border-color: #4ade80;
-  box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.2);
-}
-    button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 12px;
-  border-radius: 10px;
-  border: none;
-  background: linear-gradient(135deg, #4ade80, #22c55e);
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 12px rgba(0,0,0,0.15);
-}    .completed {
-      text-decoration: line-through;
-      color: gray;
+ <style>
+    :root {
+      --apple-blue: #007AFF;
+      --apple-gray: #8E8E93;
+      --apple-bg: #F5F5F7;
+      --glass-bg: rgba(255, 255, 255, 0.7);
     }
 
-    .task button {
-      width: auto;
-      padding: 5px 10px;
-      margin-left: 5px;
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+      background-color: var(--apple-bg);
+      background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+      background-attachment: fixed;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      color: #1D1D1F;
+    }
+
+    .container {
+      width: 400px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 40px;
+      border-radius: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      animation: appleFade 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    @keyframes appleFade {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    h2 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    #mode {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--apple-gray);
+      text-align: center;
+      margin-bottom: 5px;
+    }
+
+    #timer {
+      font-size: 64px;
+      font-weight: 200;
+      text-align: center;
+      margin: 10px 0 30px 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    input {
+      background: rgba(0, 0, 0, 0.05);
+      border: none;
+      padding: 15px;
+      margin-bottom: 12px;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    input:focus {
+      background: rgba(0, 0, 0, 0.08);
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+    }
+
+    .button-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .primary-btn {
+      background: var(--apple-blue);
+      color: white;
+      width: 100%;
+      margin-bottom: 30px;
+    }
+
+    .timer-btn {
+      background: rgba(0,0,0,0.05);
+      color: var(--apple-blue);
+    }
+
+    button:hover {
+      opacity: 0.8;
+    }
+
+    button:active {
+      transform: scale(0.96);
+    }
+
+    .task {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
   </style>
 </head>
@@ -103,140 +142,95 @@ button:hover {
 
   <input type="text" id="subject" placeholder="Subject">
   <input type="text" id="topic" placeholder="Topic">
-  <input type="number" id="questions" placeholder="Number of MCQs">
+  <input type="number" id="questions" placeholder="MCQs">
 
-  <button onclick="addTask()">Add Task</button>
+  <button class="primary-btn" onclick="addTask()">Add Task</button>
 
-<p id="mode">Mode: Study</p>
-<p id="timer">60:00</p>
-<button onclick="startTimer()">Start</button>
-<button onclick="resetTimer()">Reset</button>
+  <p id="mode">MODE: STUDY</p>
+  <p id="timer">60:00</p>
+  
+  <div class="button-group">
+    <button class="timer-btn" onclick="startTimer()">Start</button>
+    <button class="timer-btn" onclick="pauseTimer()">Pause</button>
+    <button class="timer-btn" onclick="resetTimer()">Reset</button>
+  </div>
 
   <div id="taskList"></div>
 </div>
 
-
 <script>
-let time = 3600; // 60 min in seconds
+let time = 3600;
 let isStudy = true;
 let interval = null;
-  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 
-  function saveTasks() {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }
+// PAUSE FUNCTION ADDED HERE
+function pauseTimer() {
+  clearInterval(interval);
+  interval = null;
+}
 
-  function renderTasks() {
-    const taskList = document.getElementById("taskList");
-    taskList.innerHTML = "";
+function startTimer() {
+  if (interval) return;
+  interval = setInterval(() => {
+    time--;
+    updateDisplay();
+    if (time <= 0) {
+      clearInterval(interval);
+      interval = null;
+      isStudy = !isStudy;
+      time = isStudy ? 3600 : 600;
+      document.getElementById("mode").innerText = isStudy ? "MODE: STUDY" : "MODE: BREAK";
+      startTimer();
+    }
+  }, 1000);
+}
 
-    tasks.forEach((task, index) => {
-      const div = document.createElement("div");
-      div.className = "task";
+function updateDisplay() {
+  let min = Math.floor(time / 60);
+  let sec = time % 60;
+  document.getElementById("timer").innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+}
 
-      const text = document.createElement("span");
-      text.innerText = `${task.subject} - ${task.topic} (${task.questions} MCQs)`;
+function resetTimer() {
+  pauseTimer();
+  isStudy = true;
+  time = 3600;
+  document.getElementById("mode").innerText = "MODE: STUDY";
+  document.getElementById("timer").innerText = "60:00";
+}
 
-      if (task.completed) {
-        text.classList.add("completed");
-      }
-
-      const completeBtn = document.createElement("button");
-      completeBtn.innerText = "✔";
-      completeBtn.onclick = () => toggleComplete(index);
-
-      const deleteBtn = document.createElement("button");
-      deleteBtn.innerText = "✖";
-      deleteBtn.onclick = () => deleteTask(index);
-
-      div.appendChild(text);
-      div.appendChild(completeBtn);
-      div.appendChild(deleteBtn);
-
-      taskList.appendChild(div);
-    });
-  }
-
-  function addTask() {
+// Keep your existing addTask, saveTasks, renderTasks, etc. below this
+function addTask() {
     const subject = document.getElementById("subject").value;
     const topic = document.getElementById("topic").value;
     const questions = document.getElementById("questions").value;
-
-    if (!subject || !topic || !questions) {
-      alert("Fill all fields!");
-      return;
-    }
-
-    tasks.push({
-      subject,
-      topic,
-      questions,
-      completed: false
-    });
-
-    saveTasks();
-    renderTasks();
-
+    if (!subject || !topic || !questions) { alert("Fill all fields!"); return; }
+    tasks.push({ subject, topic, questions, completed: false });
+    saveTasks(); renderTasks();
     document.getElementById("subject").value = "";
     document.getElementById("topic").value = "";
     document.getElementById("questions").value = "";
   }
-
-  function toggleComplete(index) {
-    tasks[index].completed = !tasks[index].completed;
-    saveTasks();
-    renderTasks();
+  function saveTasks() { localStorage.setItem("tasks", JSON.stringify(tasks)); }
+  function toggleComplete(index) { tasks[index].completed = !tasks[index].completed; saveTasks(); renderTasks(); }
+  function deleteTask(index) { tasks.splice(index, 1); saveTasks(); renderTasks(); }
+  function renderTasks() {
+    const taskList = document.getElementById("taskList");
+    taskList.innerHTML = "";
+    tasks.forEach((task, index) => {
+      const div = document.createElement("div");
+      div.className = "task";
+      div.innerHTML = `<span>${task.subject} - ${task.topic}</span>
+                       <div>
+                         <button style="background:none; color:green" onclick="toggleComplete(${index})">✔</button>
+                         <button style="background:none; color:red" onclick="deleteTask(${index})">✖</button>
+                       </div>`;
+      taskList.appendChild(div);
+    });
   }
-
-  function deleteTask(index) {
-    tasks.splice(index, 1);
-    saveTasks();
-    renderTasks();
-  }
-renderTasks();
-
-function startTimer() {
-  if (interval) return; // prevents multiple timers
-
-  interval = setInterval(() => {
-    time--;
-
-    let min = Math.floor(time / 60);
-    let sec = time % 60;
-
-    document.getElementById("timer").innerText =
-      `${min}:${sec < 10 ? '0' : ''}${sec}`;
-
-    if (time <= 0) {
-      clearInterval(interval);
-      interval = null;
-
-      // switch mode
-      if (isStudy) {
-        isStudy = false;
-        time = 600; // 10 min break
-        document.getElementById("mode").innerText = "Mode: Break";
-      } else {
-        isStudy = true;
-        time = 3600; // back to study
-        document.getElementById("mode").innerText = "Mode: Study";
-      }
-
-      startTimer(); // auto start next session
-    }
-  }, 1000);
-}
-function resetTimer() {
-  clearInterval(interval);
-  interval = null;
-  isStudy = true;
-  time = 3600;
-
-  document.getElementById("mode").innerText = "Mode: Study";
-  document.getElementById("timer").innerText = "60:00";
-}
-
-  </script>
+  renderTasks();
+</script> 
 
 </body>
 </html>
