@@ -45,13 +45,15 @@
       margin: 0;
       display: flex;
       justify-content: center;
-      align-items: flex-start; /* Changed from center to flex-start */
+      /* This is the secret: 'flex-start' allows the page to grow downwards */
+      align-items: flex-start; 
       min-height: 100vh;
       color: var(--text-color);
-      overflow-y: auto; /* This enables vertical scrolling */
-      padding: 50px 0; /* Adds space at top and bottom so it looks nice while scrolling */
+      /* Changed from 'hidden' to 'auto' */
+      overflow-y: auto; 
+      /* Adds a 50px gap so the planner isn't touching the very top of your screen */
+      padding: 50px 0; 
     }
-
     .container {
       width: 350px;
       background: var(--container-bg);
@@ -64,8 +66,8 @@
       flex-direction: column;
       position: relative;
       border: 1px solid var(--border-color);
+      /* Ensure this is NOT set to fixed or absolute */
     }
-
     /* Mode Toggle Button Styling */
     .mode-toggle {
       position: absolute;
