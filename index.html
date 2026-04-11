@@ -1,60 +1,257 @@
-/* YouTube Aura - Fixed Grid Alignment */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Planner</title>
+  <style>
+    :root {
+      --apple-blue: #007AFF;
+      --apple-gray: #8E8E93;
+      /* Light Mode Defaults */
+      --bg-gradient: linear-gradient(135deg, #e2e2e2, #ffffff);
+      --container-bg: rgba(255, 255, 255, 0.8);
+      --text-color: #000000;
+      --input-bg: rgba(0, 0, 0, 0.05);
+      --task-bg: #ffffff;
+      --border-color: rgba(0, 0, 0, 0.1);
+    }
 
-:root {
-  --glass: rgba(255, 255, 255, 0.03);
-  --border: rgba(255, 255, 255, 0.1);
-  --blur: blur(40px) saturate(150%);
-}
+    /* Dark Mode Variables */
+    [data-theme="dark"] {
+      --bg-gradient: linear-gradient(135deg, #1c1c1e, #000000);
+      --container-bg: rgba(28, 28, 30, 0.85);
+      --text-color: #ffffff;
+      --input-bg: rgba(255, 255, 255, 0.1);
+      --task-bg: #2c2c2e;
+      --apple-gray: #aeaeb2;
+      --border-color: rgba(255, 255, 255, 0.1);
+    }
 
-/* 1. THE FIXED ORBS */
-html::before {
-  content: "";
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: #000;
-  background-image: 
-    radial-gradient(circle at 15% 30%, rgba(255, 0, 150, 0.6) 0%, transparent 20%),
-    radial-gradient(circle at 85% 70%, rgba(255, 120, 0, 0.5) 0%, transparent 20%),
-    radial-gradient(circle at 50% 10%, rgba(150, 0, 255, 0.4) 0%, transparent 25%);
-  z-index: -1;
-}
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      transition: background 0.5s ease;
+    }
 
-/* 2. TOTAL TRANSPARENCY */
-html, body, ytd-app, ytd-page-manager, #content, #page-manager,
-ytd-browse, #masthead-container, #background.ytd-masthead,
-ytd-rich-grid-renderer, #guide-content.ytd-guide-renderer,
-#item-section, #contents, ytd-two-column-browse-results-renderer,
-#primary, #secondary, ytd-rich-grid-row, #contents.ytd-rich-grid-renderer {
-  background: transparent !important;
-  background-color: transparent !important;
-}
+    .container {
+      width: 350px;
+      background: var(--container-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 30px;
+      border-radius: 30px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
 
-/* 3. THE FROSTED GLASS PANES (Header & Sidebar) */
-ytd-masthead, 
-#guide-content.ytd-guide-renderer,
-#chips-wrapper.ytd-feed-filter-chip-bar-renderer {
-  background: var(--glass) !important;
-  backdrop-filter: var(--blur) !important;
-  -webkit-backdrop-filter: var(--blur) !important;
-  border: 1px solid var(--border) !important;
-}
+    /* Mode Toggle Button Styling */
+    .mode-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--input-bg);
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+    }
 
-/* 4. THE PERFECT GAP - No size change, no lost columns */
-ytd-rich-item-renderer, ytd-video-renderer {
-  background: transparent !important;
-  border: none !important;
+    h2 { text-align: center; font-weight: 700; margin-bottom: 20px; color: var(--text-color); }
+
+    input {
+      background: var(--input-bg);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 12px;
+      outline: none;
+    }
+
+    .primary-btn {
+      background: var(--apple-blue);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    #mode { font-size: 11px; letter-spacing: 1px; color: var(--apple-gray); text-align: center; margin-bottom: 0; }
+    #timer { font-size: 60px; font-weight: 200; text-align: center; margin: 5px 0 20px 0; font-variant-numeric: tabular-nums; }
+
+    .button-group { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+    
+    .timer-btn {
+      background: var(--input-bg);
+      color: var(--apple-blue);
+      border: none;
+      padding: 10px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .task {
+      background: var(--task-bg);
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      border: 1px solid var(--border-color);
+    }
+
+    .task-text { font-size: 14px; transition: 0.3s; color: var(--text-color); }
+    .completed { text-decoration: line-through; opacity: 0.4; }
+
+    .action-btn { background: none; border: none; font-weight: 900; font-size: 18px; cursor: pointer; padding: 0 5px; }
+    .tick-btn { color: var(--apple-blue); } /* Changed to blue for better dark mode visibility */
+    .cross-btn { color: var(--apple-gray); }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <button class="mode-toggle" onclick="toggleDarkMode()" id="themeBtn">🌙</button>
+
+  <h2>Study Planner</h2>
+  <input type="text" id="subject" placeholder="Subject">
+  <input type="text" id="topic" placeholder="Topic">
+  <input type="number" id="questions" placeholder="MCQs">
+  <button class="primary-btn" onclick="addTask()">Add Task</button>
+
+  <p id="mode">MODE: STUDY</p>
+  <p id="timer">60:00</p>
   
-  /* This creates the space INSIDE the video container */
-  /* 12px is the side gap, 24px is the bottom gap */
-  padding: 0 12px 24px 12px !important; 
-  
-  margin: 0 !important;
-  box-sizing: border-box !important;
-}
-/* 5. SEARCH BAR GLASS */
-#container.ytd-searchbox {
-  background: rgba(255, 255, 255, 0.08) !important;
-  backdrop-filter: blur(15px) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 40px !important;
-}
+  <div class="button-group">
+    <button class="timer-btn" onclick="startTimer()">Start</button>
+    <button class="timer-btn" onclick="pauseTimer()">Pause</button>
+    <button class="timer-btn" onclick="resetTimer()">Reset</button>
+  </div>
+
+  <div id="taskList"></div>
+</div>
+
+<script>
+  let time = 3600; 
+  let interval = null;
+  let isStudy = true;
+  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+  /* --- Dark Mode Logic --- */
+  function toggleDarkMode() {
+    const currentTheme = document.documentElement.getAttribute("data-theme");
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+    
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.getElementById("themeBtn").innerText = newTheme === "dark" ? "☀️" : "🌙";
+  }
+
+  // Load saved theme on startup
+  const savedTheme = localStorage.getItem("theme") || "light";
+  document.documentElement.setAttribute("data-theme", savedTheme);
+  document.getElementById("themeBtn").innerText = savedTheme === "dark" ? "☀️" : "🌙";
+
+  /* --- Timer & Task Logic --- */
+  function updateDisplay() {
+    let min = Math.floor(time / 60);
+    let sec = time % 60;
+    document.getElementById("timer").innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+  }
+
+  function startTimer() {
+    if (interval) return;
+    interval = setInterval(() => {
+      if (time > 0) {
+        time--;
+        updateDisplay();
+      } else {
+        clearInterval(interval);
+        interval = null;
+        isStudy = !isStudy;
+        time = isStudy ? 3600 : 600;
+        document.getElementById("mode").innerText = isStudy ? "MODE: STUDY" : "MODE: BREAK";
+        startTimer();
+      }
+    }, 1000);
+  }
+
+  function pauseTimer() {
+    clearInterval(interval);
+    interval = null;
+  }
+
+  function resetTimer() {
+    pauseTimer();
+    time = 3600;
+    isStudy = true;
+    document.getElementById("mode").innerText = "MODE: STUDY";
+    updateDisplay();
+  }
+
+  function addTask() {
+    const s = document.getElementById("subject").value;
+    const t = document.getElementById("topic").value;
+    const q = document.getElementById("questions").value;
+    if (!s || !t || !q) return alert("Fill all fields");
+
+    tasks.push({ s, t, q, done: false });
+    saveAndShow();
+    document.getElementById("subject").value = "";
+    document.getElementById("topic").value = "";
+    document.getElementById("questions").value = "";
+  }
+
+  function toggleTask(i) {
+    tasks[i].done = !tasks[i].done;
+    saveAndShow();
+  }
+
+  function deleteTask(i) {
+    tasks.splice(i, 1);
+    saveAndShow();
+  }
+
+  function saveAndShow() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    const list = document.getElementById("taskList");
+    list.innerHTML = "";
+    
+    tasks.forEach((task, i) => {
+      list.innerHTML += `
+        <div class="task">
+          <span class="task-text ${task.done ? 'completed' : ''}">
+            ${task.s} - ${task.t} (${task.q} MCQs)
+          </span>
+          <div class="action-buttons">
+            <button class="action-btn tick-btn" onclick="toggleTask(${i})">✓</button>
+            <button class="action-btn cross-btn" onclick="deleteTask(${i})">✕</button>
+          </div>
+        </div>`;
+    });
+  }
+  saveAndShow();
+</script>
+
+</body>
+</html>
