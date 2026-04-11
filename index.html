@@ -45,10 +45,11 @@
       margin: 0;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start; /* Changed from center to flex-start */
       min-height: 100vh;
       color: var(--text-color);
-      overflow: hidden; 
+      overflow-y: auto; /* This enables vertical scrolling */
+      padding: 50px 0; /* Adds space at top and bottom so it looks nice while scrolling */
     }
 
     .container {
