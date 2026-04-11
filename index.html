@@ -8,36 +8,74 @@
     :root {
       --apple-blue: #007AFF;
       --apple-gray: #8E8E93;
-      --glass-bg: rgba(255, 255, 255, 0.8);
+      /* Light Mode Defaults */
+      --bg-gradient: linear-gradient(135deg, #e2e2e2, #ffffff);
+      --container-bg: rgba(255, 255, 255, 0.8);
+      --text-color: #000000;
+      --input-bg: rgba(0, 0, 0, 0.05);
+      --task-bg: #ffffff;
+      --border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    /* Dark Mode Variables */
+    [data-theme="dark"] {
+      --bg-gradient: linear-gradient(135deg, #1c1c1e, #000000);
+      --container-bg: rgba(28, 28, 30, 0.85);
+      --text-color: #ffffff;
+      --input-bg: rgba(255, 255, 255, 0.1);
+      --task-bg: #2c2c2e;
+      --apple-gray: #aeaeb2;
+      --border-color: rgba(255, 255, 255, 0.1);
     }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-      background: linear-gradient(135deg, #e2e2e2, #ffffff);
+      background: var(--bg-gradient);
+      color: var(--text-color);
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       margin: 0;
+      transition: background 0.5s ease;
     }
 
     .container {
       width: 350px;
-      background: var(--glass-bg);
+      background: var(--container-bg);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       padding: 30px;
       border-radius: 30px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
       display: flex;
       flex-direction: column;
+      position: relative;
     }
 
-    h2 { text-align: center; font-weight: 700; margin-bottom: 20px; }
+    /* Mode Toggle Button Styling */
+    .mode-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--input-bg);
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+    }
+
+    h2 { text-align: center; font-weight: 700; margin-bottom: 20px; color: var(--text-color); }
 
     input {
-      background: rgba(0, 0, 0, 0.05);
-      border: none;
+      background: var(--input-bg);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
       padding: 12px;
       margin-bottom: 10px;
       border-radius: 12px;
@@ -61,7 +99,7 @@
     .button-group { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
     
     .timer-btn {
-      background: rgba(0,0,0,0.05);
+      background: var(--input-bg);
       color: var(--apple-blue);
       border: none;
       padding: 10px;
@@ -70,29 +108,31 @@
       cursor: pointer;
     }
 
-    /* Task styling */
     .task {
-      background: white;
+      background: var(--task-bg);
       padding: 12px;
       border-radius: 12px;
       margin-top: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      border: 1px solid var(--border-color);
     }
 
-    .task-text { font-size: 14px; transition: 0.3s; }
-    .completed { text-decoration: line-through; opacity: 0.3; font-weight: normal; }
+    .task-text { font-size: 14px; transition: 0.3s; color: var(--text-color); }
+    .completed { text-decoration: line-through; opacity: 0.4; }
 
     .action-btn { background: none; border: none; font-weight: 900; font-size: 18px; cursor: pointer; padding: 0 5px; }
-    .tick-btn { color: #48484A; }
-    .cross-btn { color: #8E8E93; }
+    .tick-btn { color: var(--apple-blue); } /* Changed to blue for better dark mode visibility */
+    .cross-btn { color: var(--apple-gray); }
   </style>
 </head>
 <body>
 
 <div class="container">
+  <button class="mode-toggle" onclick="toggleDarkMode()" id="themeBtn">🌙</button>
+
   <h2>Study Planner</h2>
   <input type="text" id="subject" placeholder="Subject">
   <input type="text" id="topic" placeholder="Topic">
@@ -117,86 +157,26 @@
   let isStudy = true;
   let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 
+  /* --- Dark Mode Logic --- */
+  function toggleDarkMode() {
+    const currentTheme = document.documentElement.getAttribute("data-theme");
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+    
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.getElementById("themeBtn").innerText = newTheme === "dark" ? "☀️" : "🌙";
+  }
+
+  // Load saved theme on startup
+  const savedTheme = localStorage.getItem("theme") || "light";
+  document.documentElement.setAttribute("data-theme", savedTheme);
+  document.getElementById("themeBtn").innerText = savedTheme === "dark" ? "☀️" : "🌙";
+
+  /* --- Timer & Task Logic --- */
   function updateDisplay() {
     let min = Math.floor(time / 60);
     let sec = time % 60;
     document.getElementById("timer").innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
   }
 
-  function startTimer() {
-    if (interval) return; // Prevent double-speed
-    interval = setInterval(() => {
-      if (time > 0) {
-        time--;
-        updateDisplay();
-      } else {
-        clearInterval(interval);
-        interval = null;
-        isStudy = !isStudy;
-        time = isStudy ? 3600 : 600;
-        document.getElementById("mode").innerText = isStudy ? "MODE: STUDY" : "MODE: BREAK";
-        startTimer();
-      }
-    }, 1000);
-  }
-
-  function pauseTimer() {
-    clearInterval(interval);
-    interval = null;
-  }
-
-  function resetTimer() {
-    pauseTimer();
-    time = 3600;
-    isStudy = true;
-    document.getElementById("mode").innerText = "MODE: STUDY";
-    updateDisplay();
-  }
-
-  function addTask() {
-    const s = document.getElementById("subject").value;
-    const t = document.getElementById("topic").value;
-    const q = document.getElementById("questions").value;
-    if (!s || !t || !q) return alert("Fill all fields");
-
-    tasks.push({ s, t, q, done: false });
-    saveAndShow();
-    document.getElementById("subject").value = "";
-    document.getElementById("topic").value = "";
-    document.getElementById("questions").value = "";
-  }
-
-  function toggleTask(i) {
-    tasks[i].done = !tasks[i].done;
-    saveAndShow();
-  }
-
-  function deleteTask(i) {
-    tasks.splice(i, 1);
-    saveAndShow();
-  }
-
-  function saveAndShow() {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-    const list = document.getElementById("taskList");
-    list.innerHTML = "";
-    
-    tasks.forEach((task, i) => {
-      // We added (${task.q} MCQs) to the line below
-      list.innerHTML += `
-        <div class="task">
-          <span class="task-text ${task.done ? 'completed' : ''}">
-            ${task.s} - ${task.t} (${task.q} MCQs)
-          </span>
-          <div class="action-buttons">
-            <button class="action-btn tick-btn" onclick="toggleTask(${i})">✓</button>
-            <button class="action-btn cross-btn" onclick="deleteTask(${i})">✕</button>
-          </div>
-        </div>`;
-    });
-  }
-  saveAndShow();
-</script>
-
-</body>
-</html>
+  function
