@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aura Study Planner</title>
   <style>
+    /* --- 1. THE VARIABLES --- */
     :root {
       --apple-blue: #007AFF;
       --apple-gray: #8E8E93;
-      /* Light Mode */
       --container-bg: rgba(255, 255, 255, 0.7);
       --text-color: #1d1d1f;
       --input-bg: rgba(0, 0, 0, 0.05);
@@ -28,7 +28,7 @@
       --orb-opacity: 0.5;
     }
 
-    /* --- THE FIXED AURA BACKGROUND --- */
+    /* --- 2. THE AURA BACKGROUND --- */
     body::before {
       content: "";
       position: fixed;
@@ -50,8 +50,10 @@
       align-items: center;
       min-height: 100vh;
       color: var(--text-color);
+      overflow: hidden; /* Stops scrollbars from appearing */
     }
 
+    /* --- 3. THE GLASS CONTAINER --- */
     .container {
       width: 360px;
       background: var(--container-bg);
@@ -64,14 +66,14 @@
       position: relative;
     }
 
-    h2 { text-align: center; font-weight: 700; margin-top: 0; }
-
     .mode-toggle {
       position: absolute; top: 20px; right: 20px;
       background: var(--input-bg); border: none;
       width: 36px; height: 36px; border-radius: 50%;
       cursor: pointer; font-size: 18px;
     }
+
+    h2 { text-align: center; font-weight: 700; margin-top: 0; }
 
     input {
       width: 100%; box-sizing: border-box;
@@ -121,3 +123,46 @@
 
   <p id="mode">MODE: STUDY</p>
   <p id="timer">60:00</p>
+  
+  <div class="button-group">
+    <button class="timer-btn" onclick="startTimer()">Start</button>
+    <button class="timer-btn" onclick="pauseTimer()">Pause</button>
+    <button class="timer-btn" onclick="resetTimer()">Reset</button>
+  </div>
+
+  <div id="taskList"></div>
+</div>
+
+<script>
+  let time = 3600; 
+  let interval = null;
+  let isStudy = true;
+  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+  function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
+    const isDark = document.body.classList.contains("dark-mode");
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+    document.getElementById("themeBtn").innerText = isDark ? "☀️" : "🌙";
+  }
+
+  // Load saved theme
+  if (localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark-mode");
+    document.getElementById("themeBtn").innerText = "☀️";
+  }
+
+  function updateDisplay() {
+    let min = Math.floor(time / 60);
+    let sec = time % 60;
+    document.getElementById("timer").innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+  }
+
+  function startTimer() {
+    if (interval) return;
+    interval = setInterval(() => {
+      if (time > 0) {
+        time--;
+        updateDisplay();
+      } else {
+        clearInterval(interval);
