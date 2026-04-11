@@ -1,186 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aura Study Planner</title>
-  <style>
-    :root {
-      --apple-blue: #007AFF;
-      --apple-gray: #8E8E93;
-      --container-bg: rgba(255, 255, 255, 0.8);
-      --text-color: #1d1d1f;
-      --input-bg: rgba(0, 0, 0, 0.05);
-      --task-bg: rgba(255, 255, 255, 0.6);
-      --border: rgba(0, 0, 0, 0.1);
-      --aura-bg: #f5f5f7;
-      --orb-opacity: 0.3;
-    }
+/* YouTube Aura - Fixed Grid Alignment */
 
-    body.dark-mode {
-      --container-bg: rgba(28, 28, 30, 0.9);
-      --text-color: #ffffff;
-      --input-bg: rgba(255, 255, 255, 0.1);
-      --task-bg: rgba(255, 255, 255, 0.05);
-      --border: rgba(255, 255, 255, 0.1);
-      --aura-bg: #000000;
-      --orb-opacity: 0.5;
-    }
+:root {
+  --glass: rgba(255, 255, 255, 0.03);
+  --border: rgba(255, 255, 255, 0.1);
+  --blur: blur(40px) saturate(150%);
+}
 
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      z-index: -1;
-      background-color: var(--aura-bg);
-      background-image: 
-        radial-gradient(circle at 15% 30%, rgba(255, 0, 150, var(--orb-opacity)) 0%, transparent 25%),
-        radial-gradient(circle at 85% 70%, rgba(255, 120, 0, var(--orb-opacity)) 0%, transparent 25%),
-        radial-gradient(circle at 50% 10%, rgba(150, 0, 255, var(--orb-opacity)) 0%, transparent 30%);
-      transition: background 0.5s ease;
-    }
+/* 1. THE FIXED ORBS */
+html::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: #000;
+  background-image: 
+    radial-gradient(circle at 15% 30%, rgba(255, 0, 150, 0.6) 0%, transparent 20%),
+    radial-gradient(circle at 85% 70%, rgba(255, 120, 0, 0.5) 0%, transparent 20%),
+    radial-gradient(circle at 50% 10%, rgba(150, 0, 255, 0.4) 0%, transparent 25%);
+  z-index: -1;
+}
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      color: var(--text-color);
-    }
+/* 2. TOTAL TRANSPARENCY */
+html, body, ytd-app, ytd-page-manager, #content, #page-manager,
+ytd-browse, #masthead-container, #background.ytd-masthead,
+ytd-rich-grid-renderer, #guide-content.ytd-guide-renderer,
+#item-section, #contents, ytd-two-column-browse-results-renderer,
+#primary, #secondary, ytd-rich-grid-row, #contents.ytd-rich-grid-renderer {
+  background: transparent !important;
+  background-color: transparent !important;
+}
 
-    .container {
-      width: 350px;
-      background: var(--container-bg);
-      backdrop-filter: blur(40px);
-      -webkit-backdrop-filter: blur(40px);
-      padding: 30px;
-      border-radius: 30px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-      border: 1px solid var(--border);
-      position: relative;
-    }
+/* 3. THE FROSTED GLASS PANES (Header & Sidebar) */
+ytd-masthead, 
+#guide-content.ytd-guide-renderer,
+#chips-wrapper.ytd-feed-filter-chip-bar-renderer {
+  background: var(--glass) !important;
+  backdrop-filter: var(--blur) !important;
+  -webkit-backdrop-filter: var(--blur) !important;
+  border: 1px solid var(--border) !important;
+}
 
-    .mode-toggle {
-      position: absolute; top: 20px; right: 20px;
-      background: var(--input-bg); border: none;
-      width: 35px; height: 35px; border-radius: 50%;
-      cursor: pointer; font-size: 18px; color: var(--text-color);
-    }
-
-    h2 { text-align: center; margin: 0 0 20px 0; }
-
-    input {
-      width: 100%; box-sizing: border-box;
-      background: var(--input-bg); color: var(--text-color);
-      border: 1px solid var(--border);
-      padding: 12px; margin-bottom: 10px;
-      border-radius: 12px; outline: none;
-    }
-
-    .primary-btn {
-      width: 100%; background: var(--apple-blue); color: white;
-      border: none; padding: 14px; border-radius: 12px;
-      font-weight: 600; cursor: pointer; margin-bottom: 20px;
-    }
-
-    #mode-label { font-size: 11px; color: var(--apple-gray); text-align: center; margin: 0; font-weight: bold; }
-    #timer-display { font-size: 60px; font-weight: 200; text-align: center; margin: 5px 0 20px 0; }
-
-    .button-group { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-    
-    .timer-btn {
-      background: var(--input-bg); color: var(--apple-blue);
-      border: none; padding: 10px; border-radius: 10px;
-      font-weight: 600; cursor: pointer;
-    }
-
-    .task-item {
-      background: var(--task-bg); padding: 12px; border-radius: 12px;
-      margin-top: 10px; display: flex; justify-content: space-between;
-      border: 1px solid var(--border);
-    }
-
-    .done { text-decoration: line-through; opacity: 0.4; }
-  </style>
-</head>
-<body>
-
-<div class="container">
-  <button class="mode-toggle" onclick="handleTheme()">🌙</button>
-  <h2>Study Planner</h2>
+/* 4. THE PERFECT GAP - No size change, no lost columns */
+ytd-rich-item-renderer, ytd-video-renderer {
+  background: transparent !important;
+  border: none !important;
   
-  <input type="text" id="in-subject" placeholder="Subject">
-  <input type="text" id="in-topic" placeholder="Topic">
-  <input type="number" id="in-qs" placeholder="MCQs">
-  <button class="primary-btn" onclick="handleAddTask()">Add Task</button>
-
-  <p id="mode-label">MODE: STUDY</p>
-  <p id="timer-display">60:00</p>
+  /* This creates the space INSIDE the video container */
+  /* 12px is the side gap, 24px is the bottom gap */
+  padding: 0 12px 24px 12px !important; 
   
-  <div class="button-group">
-    <button class="timer-btn" onclick="handleStart()">Start</button>
-    <button class="timer-btn" onclick="handlePause()">Pause</button>
-    <button class="timer-btn" onclick="handleReset()">Reset</button>
-  </div>
-
-  <div id="taskList"></div>
-</div>
-
-<script>
-  // State
-  let timeLeft = 3600; 
-  let timerObj = null;
-  let studyMode = true;
-  let taskArray = JSON.parse(localStorage.getItem("plannerTasks")) || [];
-
-  // 1. Theme Logic
-  function handleTheme() {
-    document.body.classList.toggle("dark-mode");
-    const isDark = document.body.classList.contains("dark-mode");
-    localStorage.setItem("plannerTheme", isDark ? "dark" : "light");
-    document.querySelector(".mode-toggle").innerText = isDark ? "☀️" : "🌙";
-  }
-
-  // Auto-load theme
-  if (localStorage.getItem("plannerTheme") === "dark") {
-    document.body.classList.add("dark-mode");
-    document.querySelector(".mode-toggle").innerText = "☀️";
-  }
-
-  // 2. Timer Logic
-  function updateTimerUI() {
-    let m = Math.floor(timeLeft / 60);
-    let s = timeLeft % 60;
-    document.getElementById("timer-display").innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-  }
-
-  function handleStart() {
-    if (timerObj) return;
-    timerObj = setInterval(() => {
-      if (timeLeft > 0) {
-        timeLeft--;
-        updateTimerUI();
-      } else {
-        clearInterval(timerObj);
-        timerObj = null;
-        studyMode = !studyMode;
-        timeLeft = studyMode ? 3600 : 600;
-        document.getElementById("mode-label").innerText = studyMode ? "MODE: STUDY" : "MODE: BREAK";
-        alert(studyMode ? "Break's over!" : "Take a break!");
-        handleStart();
-      }
-    }, 1000);
-  }
-
-  function handlePause() {
-    clearInterval(timerObj);
-    timerObj = null;
-  }
-
-  function handleReset() {
-    handlePause();
-    timeLeft = 3600;
-    studyMode = true;
-    document.getElementById("mode-label").innerText = "MODE:
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+/* 5. SEARCH BAR GLASS */
+#container.ytd-searchbox {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(15px) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 40px !important;
+}
