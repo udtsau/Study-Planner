@@ -166,8 +166,7 @@
   <div id="taskList"></div>
 </div>
 
-<script>
-  let time = 3600; 
+let time = 3600; 
   let interval = null;
   let isStudy = true;
   let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
@@ -176,22 +175,47 @@
   function toggleDarkMode() {
     const currentTheme = document.documentElement.getAttribute("data-theme");
     const newTheme = currentTheme === "dark" ? "light" : "dark";
-    
     document.documentElement.setAttribute("data-theme", newTheme);
     localStorage.setItem("theme", newTheme);
     document.getElementById("themeBtn").innerText = newTheme === "dark" ? "☀️" : "🌙";
   }
 
-  // Load saved theme on startup
   const savedTheme = localStorage.getItem("theme") || "light";
   document.documentElement.setAttribute("data-theme", savedTheme);
   document.getElementById("themeBtn").innerText = savedTheme === "dark" ? "☀️" : "🌙";
 
-  /* --- Timer & Task Logic --- */
+  /* --- Persistent Timer Logic --- */
   function updateDisplay() {
     let min = Math.floor(time / 60);
     let sec = time % 60;
     document.getElementById("timer").innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+    
+    // SAVE DATA EVERY SECOND
+    localStorage.setItem("timerTime", time);
+    localStorage.setItem("timerMode", isStudy);
+    localStorage.setItem("lastTimestamp", Date.now());
+  }
+
+  function loadTimerState() {
+    const savedTime = localStorage.getItem("timerTime");
+    const savedMode = localStorage.getItem("timerMode");
+    const lastTimestamp = localStorage.getItem("lastTimestamp");
+
+    if (savedTime !== null && lastTimestamp !== null) {
+      isStudy = (savedMode === 'true');
+      const elapsedSeconds = Math.floor((Date.now() - parseInt(lastTimestamp)) / 1000);
+      
+      // Calculate how much time is left after the "laptop death" period
+      time = Math.max(0, parseInt(savedTime) - elapsedSeconds);
+      
+      document.getElementById("mode").innerText = isStudy ? "MODE: STUDY" : "MODE: BREAK";
+      updateDisplay();
+
+      // If the timer was running before it crashed, restart it automatically
+      if (time > 0) {
+        startTimer();
+      }
+    }
   }
 
   function startTimer() {
@@ -221,15 +245,17 @@
     time = 3600;
     isStudy = true;
     document.getElementById("mode").innerText = "MODE: STUDY";
+    localStorage.removeItem("timerTime");
+    localStorage.removeItem("lastTimestamp");
     updateDisplay();
   }
 
+  /* --- Task Logic --- */
   function addTask() {
     const s = document.getElementById("subject").value;
     const t = document.getElementById("topic").value;
     const q = document.getElementById("questions").value;
     if (!s || !t || !q) return alert("Fill all fields");
-
     tasks.push({ s, t, q, done: false });
     saveAndShow();
     document.getElementById("subject").value = "";
@@ -251,7 +277,6 @@
     localStorage.setItem("tasks", JSON.stringify(tasks));
     const list = document.getElementById("taskList");
     list.innerHTML = "";
-    
     tasks.forEach((task, i) => {
       list.innerHTML += `
         <div class="task">
@@ -265,8 +290,12 @@
         </div>`;
     });
   }
+
+  // Initial loads
   saveAndShow();
-</script>
+  loadTimerState(); // This is what restores your timer on refresh
+  updateDisplay();
+    </script>
 
 </body>
 </html>
