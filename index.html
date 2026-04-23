@@ -149,8 +149,8 @@
   <h2>Study Planner</h2>
   
   <div class="setup-group" style="display: flex; gap: 5px; margin-bottom: 10px;">
-    <input type="number" id="studyInput" placeholder="Study (min)" style="width: 50%;">
-    <input type="number" id="breakInput" placeholder="Break (min)" style="width: 50%;">
+    <input type="number" id="studyInput" placeholder="Study (min)">
+    <input type="number" id="breakInput" placeholder="Break (min)">
   </div>
   
   <input type="text" id="subject" placeholder="Subject">
@@ -158,7 +158,7 @@
   <button class="primary-btn" onclick="addTask()">Add Task</button>
 
   <p id="mode">MODE: STUDY</p>
-  <p id="timer">60:00</p>
+  <p id="timer">--:--</p>
   
   <div class="button-group">
     <button class="timer-btn" onclick="startTimer()">Start</button>
@@ -170,9 +170,123 @@
 </div>
 
 <script>
+  /* --- STATE MANAGEMENT --- */
   let studyMins = localStorage.getItem("customStudy") || 60;
   let breakMins = localStorage.getItem("customBreak") || 10;
-  
-  let time = localStorage.getItem("timerTime") ? parseInt(localStorage.getItem("timerTime")) : studyMins * 60;
-  let interval = null;
   let isStudy = localStorage.getItem("timerMode") === "false" ? false : true;
+  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+  let interval = null;
+  
+  // Set initial timer based on saved time or default
+  let time = localStorage.getItem("timerTime") ? parseInt(localStorage.getItem("timerTime")) : (studyMins * 60);
+
+  // Set input fields to show current settings
+  document.getElementById("studyInput").value = studyMins;
+  document.getElementById("breakInput").value = breakMins;
+
+  /* --- THEME LOGIC --- */
+  function toggleDarkMode() {
+    const currentTheme = document.documentElement.getAttribute("data-theme");
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.getElementById("themeBtn").innerText = newTheme === "dark" ? "☀️" : "🌙";
+  }
+
+  // Load theme immediately
+  const savedTheme = localStorage.getItem("theme") || "light";
+  document.documentElement.setAttribute("data-theme", savedTheme);
+  document.getElementById("themeBtn").innerText = savedTheme === "dark" ? "☀️" : "🌙";
+
+  /* --- TIMER LOGIC --- */
+  function updateDisplay() {
+    let min = Math.floor(time / 60);
+    let sec = time % 60;
+    document.getElementById("timer").innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+    document.getElementById("mode").innerText = isStudy ? "MODE: STUDY" : "MODE: BREAK";
+    
+    localStorage.setItem("timerTime", time);
+    localStorage.setItem("timerMode", isStudy);
+    localStorage.setItem("lastTimestamp", Date.now());
+  }
+
+  function startTimer() {
+    if (interval) return;
+
+    // Get values from inputs (or use defaults if empty)
+    studyMins = document.getElementById("studyInput").value || 60;
+    breakMins = document.getElementById("breakInput").value || 10;
+    localStorage.setItem("customStudy", studyMins);
+    localStorage.setItem("customBreak", breakMins);
+
+    interval = setInterval(() => {
+      if (time > 0) {
+        time--;
+        updateDisplay();
+      } else {
+        clearInterval(interval);
+        interval = null;
+        isStudy = !isStudy;
+        time = isStudy ? studyMins * 60 : breakMins * 60;
+        startTimer(); // Auto-switch mode
+      }
+    }, 1000);
+  }
+
+  function pauseTimer() {
+    clearInterval(interval);
+    interval = null;
+  }
+
+  function resetTimer() {
+    pauseTimer();
+    studyMins = document.getElementById("studyInput").value || 60;
+    time = studyMins * 60;
+    isStudy = true;
+    updateDisplay();
+  }
+
+  function loadTimerState() {
+    const lastTimestamp = localStorage.getItem("lastTimestamp");
+    if (lastTimestamp && time > 0) {
+      const elapsed = Math.floor((Date.now() - parseInt(lastTimestamp)) / 1000);
+      time = Math.max(0, time - elapsed);
+      // We don't auto-start here to prevent glitches, but update the view
+    }
+    updateDisplay();
+  }
+
+  /* --- TASK LOGIC --- */
+  function addTask() {
+    const s = document.getElementById("subject").value.trim();
+    const t = document.getElementById("topic").value.trim();
+    
+    if (!s || !t) {
+      alert("Please enter both Subject and Topic");
+      return;
+    }
+
+    tasks.push({ s, t, done: false });
+    saveAndShow();
+    
+    // Clear inputs
+    document.getElementById("subject").value = "";
+    document.getElementById("topic").value = "";
+  }
+
+  window.toggleTask = function(i) {
+    tasks[i].done = !tasks[i].done;
+    saveAndShow();
+  }
+
+  window.deleteTask = function(i) {
+    tasks.splice(i, 1);
+    saveAndShow();
+  }
+
+  function saveAndShow() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    const list = document.getElementById("taskList");
+    list.innerHTML = "";
+    tasks.forEach((task, i) => {
+      list.innerHTML += `
