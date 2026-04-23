@@ -27,6 +27,7 @@
       --aura-bg: #000000;
       --orb-opacity: 0.5;
     }
+
     body::before {
       content: "";
       position: fixed;
@@ -41,7 +42,108 @@
     }
 
     body {
-      <div class="container">
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start; 
+      min-height: 100vh;
+      color: var(--text-color);
+      overflow-y: auto; 
+      padding: 50px 0; 
+    }
+
+    .container {
+      width: 350px;
+      background: var(--container-bg);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      padding: 30px;
+      border-radius: 30px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      border: 1px solid var(--border-color);
+    }
+
+    .mode-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--input-bg);
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+    }
+
+    h2 { text-align: center; font-weight: 700; margin-bottom: 20px; color: var(--text-color); }
+
+    input {
+      background: var(--input-bg);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 12px;
+      outline: none;
+    }
+
+    .primary-btn {
+      background: var(--apple-blue);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    #mode { font-size: 11px; letter-spacing: 1px; color: var(--apple-gray); text-align: center; margin-bottom: 0; }
+    #timer { font-size: 60px; font-weight: 200; text-align: center; margin: 5px 0 20px 0; font-variant-numeric: tabular-nums; }
+
+    .button-group { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+    
+    .timer-btn {
+      background: var(--input-bg);
+      color: var(--apple-blue);
+      border: none;
+      padding: 10px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .task {
+      background: var(--task-bg);
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      border: 1px solid var(--border-color);
+    }
+
+    .task-text { font-size: 14px; transition: 0.3s; color: var(--text-color); }
+    .completed { text-decoration: line-through; opacity: 0.4; }
+
+    .action-btn { background: none; border: none; font-weight: 900; font-size: 18px; cursor: pointer; padding: 0 5px; }
+    .tick-btn { color: var(--apple-blue); } 
+    .cross-btn { color: var(--apple-gray); }
+  </style>
+</head>
+<body>
+
+<div class="container">
   <button class="mode-toggle" onclick="toggleDarkMode()" id="themeBtn">🌙</button>
 
   <h2>Study Planner</h2>
@@ -68,259 +170,9 @@
 </div>
 
 <script>
-  // Default values or loaded from storage
   let studyMins = localStorage.getItem("customStudy") || 60;
   let breakMins = localStorage.getItem("customBreak") || 10;
   
   let time = localStorage.getItem("timerTime") ? parseInt(localStorage.getItem("timerTime")) : studyMins * 60;
   let interval = null;
   let isStudy = localStorage.getItem("timerMode") === "false" ? false : true;
-  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-
-  // Set input display values
-  document.getElementById("studyInput").value = studyMins;
-  document.getElementById("breakInput").value = breakMins;
-
-  /* --- Dark Mode --- */
-  function toggleDarkMode() {
-    const theme = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("theme", theme);
-    document.getElementById("themeBtn").innerText = theme === "dark" ? "☀️" : "🌙";
-  }
-  const savedTheme = localStorage.getItem("theme") || "light";
-  document.documentElement.setAttribute("data-theme", savedTheme);
-
-  /* --- Timer Logic --- */
-  function updateDisplay() {
-    let min = Math.floor(time / 60);
-    let sec = time % 60;
-    document.getElementById("timer").innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
-    document.getElementById("mode").innerText = isStudy ? "MODE: STUDY" : "MODE: BREAK";
-    
-    localStorage.setItem("timerTime", time);
-    localStorage.setItem("timerMode", isStudy);
-    localStorage.setItem("lastTimestamp", Date.now());
-  }
-
-  function startTimer() {
-    if (interval) return;
-    
-    // Lock in custom times when you hit start
-    studyMins = document.getElementById("studyInput").value;
-    breakMins = document.getElementById("breakInput").value;
-    localStorage.setItem("customStudy", studyMins);
-    localStorage.setItem("customBreak", breakMins);
-
-    interval = setInterval(() => {
-      if (time > 0) {
-        time--;
-        updateDisplay();
-      } else {
-        clearInterval(interval);
-        interval = null;
-        isStudy = !isStudy;
-        time = isStudy ? studyMins * 60 : breakMins * 60;
-        startTimer();
-      }
-    }, 1000);
-  }
-
-  function pauseTimer() {
-    clearInterval(interval);
-    interval = null;
-  }
-
-  function resetTimer() {
-    pauseTimer();
-    studyMins = document.getElementById("studyInput").value;
-    time = studyMins * 60;
-    isStudy = true;
-    updateDisplay();
-  }
-
-  function loadTimerState() {
-    const lastTimestamp = localStorage.getItem("lastTimestamp");
-    if (lastTimestamp && time > 0) {
-      const elapsed = Math.floor((Date.now() - parseInt(lastTimestamp)) / 1000);
-      time = Math.max(0, time - elapsed);
-      updateDisplay();
-      if (time > 0) startTimer();
-    }
-  }
-
-  /* --- Task Logic (No MCQs) --- */
-  function addTask() {
-    const s = document.getElementById("subject").value;
-    const t = document.getElementById("topic").value;
-    if (!s || !t) return alert("Fill Subject and Topic");
-
-    tasks.push({ s, t, done: false });
-    saveAndShow();
-    document.getElementById("subject").value = "";
-    document.getElementById("topic").value = "";
-  }
-
-  function toggleTask(i) {
-    tasks[i].done = !tasks[i].done;
-    saveAndShow();
-  }
-
-  function deleteTask(i) {
-    tasks.splice(i, 1);
-    saveAndShow();
-  }
-
-  function saveAndShow() {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-    const list = document.getElementById("taskList");
-    list.innerHTML = "";
-    tasks.forEach((task, i) => {
-      list.innerHTML += `
-        <div class="task">
-          <span class="task-text ${task.done ? 'completed' : ''}">${task.s} - ${task.t}</span>
-          <div>
-            <button class="action-btn tick-btn" onclick="toggleTask(${i})">✓</button>
-            <button class="action-btn cross-btn" onclick="deleteTask(${i})">✕</button>
-          </div>
-        </div>`;
-    });
-  }
-
-  saveAndShow();
-  loadTimerState();
-  updateDisplay();
-</script>
-let time = 3600; 
-  let interval = null;
-  let isStudy = true;
-  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-
-  /* --- Dark Mode Logic --- */
-  function toggleDarkMode() {
-    const currentTheme = document.documentElement.getAttribute("data-theme");
-    const newTheme = currentTheme === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", newTheme);
-    localStorage.setItem("theme", newTheme);
-    document.getElementById("themeBtn").innerText = newTheme === "dark" ? "☀️" : "🌙";
-  }
-
-  const savedTheme = localStorage.getItem("theme") || "light";
-  document.documentElement.setAttribute("data-theme", savedTheme);
-  document.getElementById("themeBtn").innerText = savedTheme === "dark" ? "☀️" : "🌙";
-
-  /* --- Persistent Timer Logic --- */
-  function updateDisplay() {
-    let min = Math.floor(time / 60);
-    let sec = time % 60;
-    document.getElementById("timer").innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
-    
-    // SAVE DATA EVERY SECOND
-    localStorage.setItem("timerTime", time);
-    localStorage.setItem("timerMode", isStudy);
-    localStorage.setItem("lastTimestamp", Date.now());
-  }
-
-  function loadTimerState() {
-    const savedTime = localStorage.getItem("timerTime");
-    const savedMode = localStorage.getItem("timerMode");
-    const lastTimestamp = localStorage.getItem("lastTimestamp");
-
-    if (savedTime !== null && lastTimestamp !== null) {
-      isStudy = (savedMode === 'true');
-      const elapsedSeconds = Math.floor((Date.now() - parseInt(lastTimestamp)) / 1000);
-      
-      // Calculate how much time is left after the "laptop death" period
-      time = Math.max(0, parseInt(savedTime) - elapsedSeconds);
-      
-      document.getElementById("mode").innerText = isStudy ? "MODE: STUDY" : "MODE: BREAK";
-      updateDisplay();
-
-      // If the timer was running before it crashed, restart it automatically
-      if (time > 0) {
-        startTimer();
-      }
-    }
-  }
-
-  function startTimer() {
-    if (interval) return;
-    interval = setInterval(() => {
-      if (time > 0) {
-        time--;
-        updateDisplay();
-      } else {
-        clearInterval(interval);
-        interval = null;
-        isStudy = !isStudy;
-        time = isStudy ? 3600 : 600;
-        document.getElementById("mode").innerText = isStudy ? "MODE: STUDY" : "MODE: BREAK";
-        startTimer();
-      }
-    }, 1000);
-  }
-
-  function pauseTimer() {
-    clearInterval(interval);
-    interval = null;
-  }
-
-  function resetTimer() {
-    pauseTimer();
-    time = 3600;
-    isStudy = true;
-    document.getElementById("mode").innerText = "MODE: STUDY";
-    localStorage.removeItem("timerTime");
-    localStorage.removeItem("lastTimestamp");
-    updateDisplay();
-  }
-
-  /* --- Task Logic --- */
-  function addTask() {
-    const s = document.getElementById("subject").value;
-    const t = document.getElementById("topic").value;
-    const q = document.getElementById("questions").value;
-    if (!s || !t || !q) return alert("Fill all fields");
-    tasks.push({ s, t, q, done: false });
-    saveAndShow();
-    document.getElementById("subject").value = "";
-    document.getElementById("topic").value = "";
-    document.getElementById("questions").value = "";
-  }
-
-  function toggleTask(i) {
-    tasks[i].done = !tasks[i].done;
-    saveAndShow();
-  }
-
-  function deleteTask(i) {
-    tasks.splice(i, 1);
-    saveAndShow();
-  }
-
-  function saveAndShow() {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-    const list = document.getElementById("taskList");
-    list.innerHTML = "";
-    tasks.forEach((task, i) => {
-      list.innerHTML += `
-        <div class="task">
-          <span class="task-text ${task.done ? 'completed' : ''}">
-            ${task.s} - ${task.t} (${task.q} MCQs)
-          </span>
-          <div class="action-buttons">
-            <button class="action-btn tick-btn" onclick="toggleTask(${i})">✓</button>
-            <button class="action-btn cross-btn" onclick="deleteTask(${i})">✕</button>
-          </div>
-        </div>`;
-    });
-  }
-
-  // Initial loads
-  saveAndShow();
-  loadTimerState(); // This is what restores your timer on refresh
-  updateDisplay();
-    </script>
-
-</body>
-</html>
