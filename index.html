@@ -235,18 +235,29 @@
     alert("Timer updated!");
   }
 
+  /* --- UPDATED TIMER LOGIC --- */
   function startTimer() {
     if (interval) return;
+
+    // We store the "Expected Finish Time" so the timer stays accurate 
+    // even if the tab is in the background.
+    let expectedEndTime = Date.now() + (time * 1000);
+
     interval = setInterval(() => {
-      if (time > 0) {
-        time--;
+      let now = Date.now();
+      let remaining = Math.round((expectedEndTime - now) / 1000);
+
+      if (remaining > 0) {
+        time = remaining;
         updateDisplay();
       } else {
+        // Mode Switch logic remains the same
         clearInterval(interval);
         interval = null;
         isStudy = !isStudy;
-        time = isStudy ? studyMins * 60 : breakMins * 60;
-        startTimer();
+        time = isStudy ? (studyMins * 60) : (breakMins * 60);
+        updateDisplay();
+        startTimer(); // Auto-start the next session (Break or Study)
       }
     }, 1000);
   }
@@ -254,8 +265,9 @@
   function pauseTimer() {
     clearInterval(interval);
     interval = null;
+    // We update display to ensure the current 'time' is locked into localStorage
+    updateDisplay();
   }
-
   function resetTimer() {
     pauseTimer();
     time = isStudy ? (studyMins * 60) : (breakMins * 60);
