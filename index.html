@@ -269,9 +269,11 @@
     updateDisplay();
   }
   function resetTimer() {
-    pauseTimer();
-    time = isStudy ? (studyMins * 60) : (breakMins * 60);
+    pauseTimer(); // Clears the old interval
+    // Sets the time back to your custom duration
+    time = isStudy ? (studyMins * 60) : (breakMins * 60); 
     updateDisplay();
+    startTimer(); // <--- Add this line here to resume immediately
   }
 
   /* --- TASK LOGIC --- */
